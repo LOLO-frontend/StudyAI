@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>White Noise - StudyAI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #003DA5; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #002d7a; border-bottom: 4px solid #FFD100; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.logo span { color: #FFD100; }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+.district { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.menu-button { padding: 10px 20px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.menu-button:hover { border-color: #FFD100; color: #FFD100; }
+.badge { font-size: 0.7rem; font-weight: 700; color: #002d7a; background: #FFD100; border-radius: 99px; padding: 4px 12px; letter-spacing: 0.04em; }
+.page { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+.breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.breadcrumb a:hover { color: #FFD100; }
+.page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.page-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+.audio-note { font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 28px; }
+.sound-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.sound-card {
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 22px; text-align: center; cursor: pointer;
+    transition: border-color .2s;
+}
+.sound-card.active { border-color: #FFD100; }
+.sound-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.sound-name { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; }
+.sound-status { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+.sound-card.active .sound-status { color: #FFD100; font-weight: 700; }
+.mixer-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+.section-title { font-size: 0.9rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+.mixer-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; opacity: 0.4; transition: opacity .2s; }
+.mixer-row.enabled { opacity: 1; }
+.mixer-icon { font-size: 1.1rem; width: 24px; }
+.mixer-label { flex: 0 0 110px; font-size: 0.85rem; }
+.mixer-slider { flex: 1; }
+.mixer-value { flex: 0 0 40px; text-align: right; font-size: 0.78rem; color: rgba(255,255,255,0.6); }
+.timer-strip { display: flex; gap: 10px; margin-top: 8px; }
+.timer-pill { flex: 1; text-align: center; padding: 12px; border-radius: 10px; background: #002d7a; border: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+.timer-pill.active { background: #FFD100; color: #002d7a; border-color: #FFD100; }
+.timer-status { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+    <div class="header-right">
+        <button class="menu-button" onclick="window.location.href='menu.html'">Study Tools</button>
+        <div class="badge">AI POWERED</div>
+    </div>
+</header>
+
+<div class="page">
+    <div class="breadcrumb"><a href="menu.html">Study Tools</a> / White Noise</div>
+    <div class="page-title">White Noise</div>
+    <div class="page-subtitle">Choose from a variety of white noise sounds to help you concentrate</div>
+    <div class="audio-note">Sounds are generated live in your browser and can be layered together, no audio files needed.</div>
+
+    <div class="sound-grid" id="soundGrid"></div>
+
+    <div class="mixer-card">
+        <div class="section-title">Mix levels</div>
+        <div id="mixerRows"></div>
+
+        <div class="section-title" style="margin-top:24px;">Auto-stop timer</div>
+        <div class="timer-strip" id="timerStrip">
+            <div class="timer-pill" data-mins="15">15 min</div>
+            <div class="timer-pill" data-mins="30">30 min</div>
+            <div class="timer-pill" data-mins="60">60 min</div>
+            <div class="timer-pill active" data-mins="0">Off</div>
+        </div>
+        <div class="timer-status" id="timerStatus">No auto-stop set</div>
+    </div>
+</div>
+
+<script>
+const sounds = [
+    { id: 'rain', name: 'Rain', icon: '&#127783;', defaultVol: 70 },
+    { id: 'ocean', name: 'Ocean waves', icon: '&#127754;', defaultVol: 60 },
+    { id: 'fan', name: 'Fan', icon: '&#128168;', defaultVol: 50 }
+];
+
+let audioCtx = null;
+let masterGain = null;
+const soundState = {};
+sounds.forEach(s => soundState[s.id] = { active: false, gainNode: null, nodes: [], timeouts: [], volume: s.defaultVol });
+
+let autoStopMinutes = 0;
+let autoStopSecondsLeft = 0;
+let autoStopInterval = null;
+
+const soundGrid = document.getElementById('soundGrid');
+const mixerRows = document.getElementById('mixerRows');
+const timerStatus = document.getElementById('timerStatus');
+
+function renderSoundGrid() {
+    soundGrid.innerHTML = '';
+    sounds.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'sound-card' + (soundState[s.id].active ? ' active' : '');
+        card.innerHTML = '<div class="sound-icon">' + s.icon + '</div>' +
+            '<div class="sound-name">' + s.name + '</div>' +
+            '<div class="sound-status">' + (soundState[s.id].active ? 'Playing' : 'Off') + '</div>';
+        card.addEventListener('click', () => toggleSound(s.id));
+        soundGrid.appendChild(card);
+    });
+}
+
+function renderMixer() {
+    mixerRows.innerHTML = '';
+    sounds.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'mixer-row' + (soundState[s.id].active ? ' enabled' : '');
+        row.id = 'mixerRow_' + s.id;
+        row.innerHTML =
+            '<span class="mixer-icon">' + s.icon + '</span>' +
+            '<span class="mixer-label">' + s.name + '</span>' +
+            '<input type="range" class="mixer-slider" min="0" max="100" value="' + soundState[s.id].volume + '" data-id="' + s.id + '">' +
+            '<span class="mixer-value" id="mixerVal_' + s.id + '">' + soundState[s.id].volume + '%</span>';
+        mixerRows.appendChild(row);
+    });
+    mixerRows.querySelectorAll('input[type=range]').forEach(input => {
+        input.addEventListener('input', () => {
+            const id = input.dataset.id;
+            soundState[id].volume = parseInt(input.value);
+            document.getElementById('mixerVal_' + id).textContent = input.value + '%';
+            if (soundState[id].gainNode) {
+                soundState[id].gainNode.gain.value = input.value / 100 * 0.8;
+            }
+        });
+    });
+}
+
+function ensureAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+    masterGain.connect(audioCtx.destination);
+}
+
+function makeNoiseBuffer(seconds) {
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * seconds, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    return buffer;
+}
+
+function makeBrownBuffer(seconds) {
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * seconds, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < data.length; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        data[i] = last * 3.5;
+    }
+    return buffer;
+}
+
+function startBuilders(id) {
+    const state = soundState[id];
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = state.volume / 100 * 0.8;
+    gainNode.connect(masterGain);
+    state.gainNode = gainNode;
+    state.nodes = [];
+    state.timeouts = [];
+
+    if (id === 'rain') {
+        const src = audioCtx.createBufferSource();
+        src.buffer = makeNoiseBuffer(3);
+        src.loop = true;
+        const hp = audioCtx.createBiquadFilter();
+        hp.type = 'highpass'; hp.frequency.value = 900;
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = 'lowpass'; lp.frequency.value = 6500;
+        const hiss = audioCtx.createGain();
+        hiss.gain.value = 0.7;
+        src.connect(hp).connect(lp).connect(hiss).connect(gainNode);
+        src.start();
+        state.nodes.push(src);
+
+        const body = audioCtx.createBufferSource();
+        body.buffer = makeBrownBuffer(3);
+        body.loop = true;
+        const bodyFilter = audioCtx.createBiquadFilter();
+        bodyFilter.type = 'bandpass'; bodyFilter.frequency.value = 500; bodyFilter.Q.value = 0.7;
+        const bodyGain = audioCtx.createGain();
+        bodyGain.gain.value = 0.4;
+        body.connect(bodyFilter).connect(bodyGain).connect(gainNode);
+        body.start();
+        state.nodes.push(body);
+
+        scheduleDroplets(id);
+    }
+    else if (id === 'ocean') {
+        const src = audioCtx.createBufferSource();
+        src.buffer = makeBrownBuffer(3);
+        src.loop = true;
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = 'lowpass'; lp.frequency.value = 700;
+        const swellGain = audioCtx.createGain();
+        swellGain.gain.value = 0.7;
+        const lfo = audioCtx.createOscillator();
+        lfo.frequency.value = 0.1;
+        const lfoAmt = audioCtx.createGain();
+        lfoAmt.gain.value = 0.35;
+        lfo.connect(lfoAmt).connect(swellGain.gain);
+        lfo.start();
+        src.connect(lp).connect(swellGain).connect(gainNode);
+        src.start();
+        state.nodes.push(src, lfo);
+
+        const foam = audioCtx.createBufferSource();
+        foam.buffer = makeNoiseBuffer(3);
+        foam.loop = true;
+        const foamFilter = audioCtx.createBiquadFilter();
+        foamFilter.type = 'bandpass'; foamFilter.frequency.value = 2500; foamFilter.Q.value = 0.6;
+        const foamGain = audioCtx.createGain();
+        foamGain.gain.value = 0.12;
+        const foamLfo = audioCtx.createOscillator();
+        foamLfo.frequency.value = 0.16;
+        const foamLfoAmt = audioCtx.createGain();
+        foamLfoAmt.gain.value = 0.1;
+        foamLfo.connect(foamLfoAmt).connect(foamGain.gain);
+        foamLfo.start();
+        foam.connect(foamFilter).connect(foamGain).connect(gainNode);
+        foam.start();
+        state.nodes.push(foam, foamLfo);
+    }
+    else if (id === 'fan') {
+        const whoosh = audioCtx.createBufferSource();
+        whoosh.buffer = makeNoiseBuffer(3);
+        whoosh.loop = true;
+        const whooshFilter = audioCtx.createBiquadFilter();
+        whooshFilter.type = 'lowpass'; whooshFilter.frequency.value = 1400;
+        const whooshGain = audioCtx.createGain();
+        whooshGain.gain.value = 0.9;
+        whoosh.connect(whooshFilter).connect(whooshGain).connect(gainNode);
+        whoosh.start();
+        state.nodes.push(whoosh);
+
+        const hum = audioCtx.createBufferSource();
+        hum.buffer = makeBrownBuffer(3);
+        hum.loop = true;
+        const humFilter = audioCtx.createBiquadFilter();
+        humFilter.type = 'bandpass'; humFilter.frequency.value = 110; humFilter.Q.value = 3;
+        const humGain = audioCtx.createGain();
+        humGain.gain.value = 1.0;
+        const lfo = audioCtx.createOscillator();
+        lfo.frequency.value = 4.5;
+        const lfoAmt = audioCtx.createGain();
+        lfoAmt.gain.value = 6;
+        lfo.connect(lfoAmt).connect(humFilter.frequency);
+        lfo.start();
+        hum.connect(humFilter).connect(humGain).connect(gainNode);
+        hum.start();
+        state.nodes.push(hum, lfo);
+    }
+}
+
+function scheduleDroplets(id) {
+    const state = soundState[id];
+    if (!state.active) return;
+    const now = audioCtx.currentTime;
+    const src = audioCtx.createBufferSource();
+    src.buffer = makeNoiseBuffer(0.05);
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 5000;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.15 + Math.random() * 0.1, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    src.connect(hp).connect(g).connect(state.gainNode);
+    src.start(now);
+    src.stop(now + 0.05);
+    const next = 60 + Math.random() * 120;
+    const t = setTimeout(() => scheduleDroplets(id), next);
+    state.timeouts.push(t);
+}
+
+function stopSound(id) {
+    const state = soundState[id];
+    state.timeouts.forEach(t => clearTimeout(t));
+    state.timeouts = [];
+    state.nodes.forEach(n => {
+        try { n.stop(); } catch (e) {}
+    });
+    state.nodes = [];
+    if (state.gainNode) {
+        try { state.gainNode.disconnect(); } catch (e) {}
+        state.gainNode = null;
+    }
+}
+
+function toggleSound(id) {
+    ensureAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const state = soundState[id];
+    state.active = !state.active;
+    if (state.active) {
+        startBuilders(id);
+    } else {
+        stopSound(id);
+    }
+    renderSoundGrid();
+    renderMixer();
+    checkAnyPlaying();
+}
+
+function checkAnyPlaying() {
+    const anyPlaying = sounds.some(s => soundState[s.id].active);
+    if (!anyPlaying) {
+        clearInterval(autoStopInterval);
+        autoStopInterval = null;
+    } else if (autoStopMinutes > 0 && !autoStopInterval) {
+        startAutoStopCountdown();
+    }
+}
+
+document.querySelectorAll('.timer-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.timer-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        autoStopMinutes = parseInt(pill.dataset.mins);
+        clearInterval(autoStopInterval);
+        autoStopInterval = null;
+        if (autoStopMinutes === 0) {
+            timerStatus.textContent = 'No auto-stop set';
+        } else {
+            autoStopSecondsLeft = autoStopMinutes * 60;
+            timerStatus.textContent = 'Stops in ' + formatCountdown(autoStopSecondsLeft);
+            if (sounds.some(s => soundState[s.id].active)) {
+                startAutoStopCountdown();
+            }
+        }
+    });
+});
+
+function formatCountdown(sec) {
+    const m = Math.floor(sec / 60);
+    const s = (sec % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+}
+
+function startAutoStopCountdown() {
+    if (autoStopMinutes === 0) return;
+    if (!autoStopSecondsLeft) autoStopSecondsLeft = autoStopMinutes * 60;
+    autoStopInterval = setInterval(() => {
+        autoStopSecondsLeft--;
+        timerStatus.textContent = 'Stops in ' + formatCountdown(autoStopSecondsLeft);
+        if (autoStopSecondsLeft <= 0) {
+            sounds.forEach(s => { if (soundState[s.id].active) { soundState[s.id].active = false; stopSound(s.id); } });
+            renderSoundGrid();
+            renderMixer();
+            clearInterval(autoStopInterval);
+            autoStopInterval = null;
+            autoStopSecondsLeft = 0;
+            timerStatus.textContent = 'Stopped automatically';
+        }
+    }, 1000);
+}
+
+renderSoundGrid();
+renderMixer();
+</script>
+</body>
+</html>

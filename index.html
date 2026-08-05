@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+
+  
+     <div class="button">    
+        <button class="menu-button"  type="button" onclick="window.location.href='menu.html'">Menu</button>
+     </div>
+    <div class="badge">AI POWERED</div>
+</header>
+
+<div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="left">
+        <h3>Your study material</h3>
+        <textarea id="studyText" placeholder="Paste any text, notes or topic here - a paragraph, a chapter, anything you want to understand or be quizzed on."></textarea>
+        <div class="actions">
+            <button class="btn-primary" onclick="explainText()">Explain this</button>
+            <button class="btn-secondary" onclick="generateQuiz()">Generate quiz</button>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('explanation')">Explanation</div>
+            <div class="tab" onclick="switchTab('quiz')">Quiz</div>
+            <div class="tab" onclick="switchTab('concepts')">Key Concepts</div>
+        </div>
+
+        <div class="response-area">
+            <div id="explanation" class="panel active">
+                <p class="placeholder-text">Paste your study material and click "Explain this" to get started.</p>
+            </div>
+            <div id="quiz" class="panel">
+                <p class="placeholder-text">Click "Generate quiz" to create questions from your material.</p>
+            </div>
+            <div id="concepts" class="panel">
+                <p class="placeholder-text">Key concepts will appear here after you explain your material.</p>
+            </div>
+        </div>
+
+        <div class="followup-bar">
+            <input type="text" id="followupInput" placeholder="Ask a follow-up question..." onkeydown="if(event.key==='Enter') askFollowup()">
+            <button class="send-btn" onclick="askFollowup()">Ask →</button>
+        </div>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+
+</body>
+</html>

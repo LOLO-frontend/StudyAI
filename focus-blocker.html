@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Blocker - StudyAI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #003DA5; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #002d7a; border-bottom: 4px solid #FFD100; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.logo span { color: #FFD100; }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+.district { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.menu-button { padding: 10px 20px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.menu-button:hover { border-color: #FFD100; color: #FFD100; }
+.badge { font-size: 0.7rem; font-weight: 700; color: #002d7a; background: #FFD100; border-radius: 99px; padding: 4px 12px; letter-spacing: 0.04em; }
+.page { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+.breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.breadcrumb a:hover { color: #FFD100; }
+.page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.page-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+.extension-note {
+    background: rgba(255,209,0,0.1); border: 1px solid rgba(255,209,0,0.3);
+    border-radius: 12px; padding: 16px 20px; font-size: 0.82rem; color: rgba(255,255,255,0.85);
+    margin-bottom: 28px; line-height: 1.6;
+}
+.extension-note strong { color: #FFD100; }
+.top-row { display: flex; gap: 16px; margin-bottom: 24px; }
+.session-card {
+    flex: 1;
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; padding: 28px; text-align: center;
+}
+.session-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,209,0,0.15); border: 2px solid #FFD100; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.6rem; }
+.session-heading { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+.session-sub { font-size: 0.8rem; color: rgba(255,255,255,0.65); margin-bottom: 20px; }
+.toggle-btn {
+    padding: 12px 28px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.85rem; cursor: pointer;
+}
+.toggle-btn.start { background: #FFD100; color: #002d7a; }
+.toggle-btn.stop { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.25); color: #fff; }
+.stat-mini { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 28px; text-align: center; flex: 0 0 200px; }
+.stat-mini-value { font-size: 1.8rem; font-weight: 800; color: #FFD100; margin-bottom: 4px; }
+.stat-mini-label { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
+.section-title { font-size: 0.9rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+.add-row { display: flex; gap: 10px; margin-bottom: 20px; }
+.add-input { flex: 1; padding: 12px 16px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: 'Inter', sans-serif; font-size: 0.85rem; }
+.add-input::placeholder { color: rgba(255,255,255,0.4); }
+.add-btn { padding: 12px 24px; border-radius: 10px; border: none; background: #FFD100; color: #002d7a; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.list-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px 20px; margin-bottom: 24px; }
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.list-row:last-child { border-bottom: none; }
+.site-name { font-size: 0.9rem; font-weight: 600; }
+.remove-btn { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 0.8rem; cursor: pointer; }
+.remove-btn:hover { color: #ff8080; }
+.list-empty { font-size: 0.85rem; color: rgba(255,255,255,0.5); text-align: center; padding: 16px 0; }
+.log-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; }
+.log-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+.log-row:last-child { border-bottom: none; }
+.log-meta { color: rgba(255,255,255,0.5); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+    <div class="header-right">
+        <button class="menu-button" onclick="window.location.href='menu.html'">Study Tools</button>
+        <div class="badge">AI POWERED</div>
+    </div>
+</header>
+
+<div class="page">
+    <div class="breadcrumb"><a href="menu.html">Study Tools</a> / Focus Blocker</div>
+    <div class="page-title">Focus Blocker</div>
+    <div class="page-subtitle">Block distracting apps and websites during your study sessions</div>
+
+    <div class="extension-note" id="extensionNote">
+        <strong>Checking for the StudyAI extension...</strong> if it's installed, this page will sync directly with it, your blocklist and blocking toggle here will control it for real. If it's not detected, you'll see reference-only mode with a download link.
+    </div>
+
+    <div class="top-row">
+        <div class="session-card">
+            <div class="session-icon" id="sessionIcon">&#128737;</div>
+            <div class="session-heading" id="sessionHeading">No session running</div>
+            <div class="session-sub" id="sessionSub">Start a session to begin tracking focus</div>
+            <button class="toggle-btn start" id="toggleBtn">Start focus session</button>
+        </div>
+        <div class="stat-mini">
+            <div class="stat-mini-value" id="statAwayCount">0</div>
+            <div class="stat-mini-label">Times you left the tab today</div>
+        </div>
+    </div>
+
+    <div class="section-title">Add a site to your blocklist</div>
+    <div class="add-row">
+        <input class="add-input" id="siteInput" placeholder="e.g. instagram.com">
+        <button class="add-btn" id="addBtn">Add</button>
+    </div>
+
+    <div class="section-title" id="blocklistSectionTitle">Your blocklist</div>
+    <div class="list-card" id="blocklistCard"></div>
+
+    <div class="section-title">Tab-away log</div>
+    <div class="log-card" id="logCard">
+        <div class="log-empty" style="text-align:center; color:rgba(255,255,255,0.5); font-size:0.85rem; padding:12px 0;">No activity yet</div>
+    </div>
+</div>
+
+<script>
+const defaultBlocklist = ['instagram.com', 'youtube.com', 'tiktok.com', 'discord.com', 'x.com', 'reddit.com'];
+
+let blocklist = JSON.parse(localStorage.getItem('focusBlockerList') || 'null') || defaultBlocklist.slice();
+const today = new Date().toDateString();
+let logData = JSON.parse(localStorage.getItem('focusBlockerLog') || 'null');
+if (!logData || logData.date !== today) {
+    logData = { date: today, awayCount: 0, entries: [] };
+}
+
+let sessionActive = false;
+let awayStart = null;
+let extensionConnected = false;
+let pendingRequests = {};
+let requestCounter = 0;
+
+const toggleBtn = document.getElementById('toggleBtn');
+const sessionHeading = document.getElementById('sessionHeading');
+const sessionSub = document.getElementById('sessionSub');
+const sessionIcon = document.getElementById('sessionIcon');
+const statAwayCount = document.getElementById('statAwayCount');
+const siteInput = document.getElementById('siteInput');
+const addBtn = document.getElementById('addBtn');
+const blocklistCard = document.getElementById('blocklistCard');
+const logCard = document.getElementById('logCard');
+const extensionNote = document.getElementById('extensionNote');
+const blocklistSectionTitle = document.getElementById('blocklistSectionTitle');
+
+function saveLocalBlocklist() {
+    localStorage.setItem('focusBlockerList', JSON.stringify(blocklist));
+}
+function saveLog() {
+    localStorage.setItem('focusBlockerLog', JSON.stringify(logData));
+}
+
+// --- Extension bridge ---
+window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    const msg = event.data;
+    if (!msg || msg.source !== 'studyai-extension') return;
+
+    if (msg.announce && !extensionConnected) {
+        extensionConnected = true;
+        onExtensionConnected();
+    }
+    if (msg.stateChanged) {
+        refreshFromExtension();
+    }
+    if (msg.requestId && pendingRequests[msg.requestId]) {
+        pendingRequests[msg.requestId](msg.response);
+        delete pendingRequests[msg.requestId];
+    }
+});
+
+function callExtension(action, payload) {
+    return new Promise((resolve) => {
+        const requestId = 'req_' + (requestCounter++);
+        pendingRequests[requestId] = resolve;
+        window.postMessage({ source: 'studyai-page', action, payload, requestId }, '*');
+        setTimeout(() => {
+            if (pendingRequests[requestId]) {
+                delete pendingRequests[requestId];
+                resolve(null);
+            }
+        }, 1500);
+    });
+}
+
+async function onExtensionConnected() {
+    extensionNote.innerHTML = '<strong>Extension connected.</strong> This page is now synced with the StudyAI Blocker extension, changes here really turn blocking on or off.';
+    extensionNote.style.borderColor = 'rgba(80,220,140,0.4)';
+    extensionNote.style.background = 'rgba(80,220,140,0.08)';
+    blocklistSectionTitle.innerHTML = 'Your blocklist <span style="color:#4ade80; font-weight:700; text-transform:none; letter-spacing:0; font-size:0.75rem;">&#9679; enforced live</span>';
+    await refreshFromExtension();
+}
+
+async function refreshFromExtension() {
+    const state = await callExtension('getState');
+    if (!state) return;
+    blocklist = state.blocklist;
+    sessionActive = state.active;
+    renderBlocklist();
+    updateSessionUI();
+}
+
+function noExtensionFallback() {
+    extensionNote.innerHTML = '<strong>Extension not detected.</strong> This page can\'t block sites on its own, browsers don\'t allow that. Install the StudyAI companion extension for real blocking, this list becomes reference-only until then. <a href="focus-blocker-extension.zip" style="color:#FFD100; font-weight:700;">Download extension</a>';
+    renderBlocklist();
+}
+
+// --- Blocklist rendering ---
+function renderBlocklist() {
+    if (blocklist.length === 0) {
+        blocklistCard.innerHTML = '<div class="list-empty">No sites added yet</div>';
+        return;
+    }
+    blocklistCard.innerHTML = '';
+    blocklist.forEach((site, i) => {
+        const row = document.createElement('div');
+        row.className = 'list-row';
+        row.innerHTML = '<span class="site-name">' + escapeHtml(site) + '</span>' +
+            '<button class="remove-btn" data-site="' + escapeHtml(site) + '">Remove</button>';
+        blocklistCard.appendChild(row);
+    });
+    blocklistCard.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const site = btn.dataset.site;
+            if (extensionConnected) {
+                await callExtension('removeSite', site);
+                await refreshFromExtension();
+            } else {
+                blocklist = blocklist.filter(s => s !== site);
+                saveLocalBlocklist();
+                renderBlocklist();
+            }
+        });
+    });
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function renderLog() {
+    statAwayCount.textContent = logData.awayCount;
+    if (logData.entries.length === 0) {
+        logCard.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.5); font-size:0.85rem; padding:12px 0;">No activity yet</div>';
+        return;
+    }
+    logCard.innerHTML = '';
+    logData.entries.slice(0, 8).forEach(entry => {
+        const row = document.createElement('div');
+        row.className = 'log-row';
+        row.innerHTML = '<span>Left tab for ' + entry.duration + '</span><span class="log-meta">' + entry.when + '</span>';
+        logCard.appendChild(row);
+    });
+}
+
+addBtn.addEventListener('click', async () => {
+    const val = siteInput.value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (!val || blocklist.includes(val)) return;
+    if (extensionConnected) {
+        await callExtension('addSite', val);
+        await refreshFromExtension();
+    } else {
+        blocklist.push(val);
+        saveLocalBlocklist();
+        renderBlocklist();
+    }
+    siteInput.value = '';
+});
+siteInput.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn.click(); });
+
+function updateSessionUI() {
+    if (sessionActive) {
+        sessionHeading.textContent = extensionConnected ? 'Blocking is on' : 'Session active';
+        sessionSub.textContent = extensionConnected ? blocklist.length + ' site' + (blocklist.length === 1 ? '' : 's') + ' actively blocked' : 'Tracking whether you stay on this tab';
+        sessionIcon.innerHTML = '&#128737;';
+        toggleBtn.textContent = extensionConnected ? 'Turn off blocking' : 'End session';
+        toggleBtn.className = 'toggle-btn stop';
+    } else {
+        sessionHeading.textContent = extensionConnected ? 'Blocking is off' : 'No session running';
+        sessionSub.textContent = extensionConnected ? 'Turn on to start blocking your list' : 'Start a session to begin tracking focus';
+        sessionIcon.innerHTML = '&#128737;';
+        toggleBtn.textContent = extensionConnected ? 'Turn on blocking' : 'Start focus session';
+        toggleBtn.className = 'toggle-btn start';
+    }
+}
+
+toggleBtn.addEventListener('click', async () => {
+    sessionActive = !sessionActive;
+    if (extensionConnected) {
+        await callExtension('setActive', sessionActive);
+    }
+    updateSessionUI();
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (!sessionActive) return;
+    if (document.hidden) {
+        awayStart = Date.now();
+    } else if (awayStart) {
+        const seconds = Math.round((Date.now() - awayStart) / 1000);
+        awayStart = null;
+        if (seconds >= 1) {
+            logData.awayCount++;
+            logData.entries.unshift({
+                duration: seconds < 60 ? seconds + 's' : Math.round(seconds / 60) + 'm',
+                when: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+            });
+            logData.entries = logData.entries.slice(0, 30);
+            saveLog();
+            renderLog();
+
+            const dateKey = new Date().toDateString();
+            const sharedLog = JSON.parse(localStorage.getItem('studyAIDailyLog') || '{}');
+            if (!sharedLog[dateKey]) sharedLog[dateKey] = { minutes: 0, sessions: 0, distractions: 0 };
+            sharedLog[dateKey].distractions = (sharedLog[dateKey].distractions || 0) + 1;
+            localStorage.setItem('studyAIDailyLog', JSON.stringify(sharedLog));
+        }
+    }
+});
+
+renderBlocklist();
+renderLog();
+updateSessionUI();
+
+// Give the extension a moment to announce itself; otherwise fall back
+setTimeout(() => {
+    if (!extensionConnected) noExtensionFallback();
+}, 700);
+</script>
+</body>
+</html>

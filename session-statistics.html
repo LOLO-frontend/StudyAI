@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Statistics - StudyAI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #003DA5; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #002d7a; border-bottom: 4px solid #FFD100; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.logo span { color: #FFD100; }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+.district { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.menu-button { padding: 10px 20px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.menu-button:hover { border-color: #FFD100; color: #FFD100; }
+.badge { font-size: 0.7rem; font-weight: 700; color: #002d7a; background: #FFD100; border-radius: 99px; padding: 4px 12px; letter-spacing: 0.04em; }
+.page { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+.breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.breadcrumb a:hover { color: #FFD100; }
+.page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.page-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+.data-note { font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 28px; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; }
+.stat-value { font-size: 1.5rem; font-weight: 800; color: #FFD100; margin-bottom: 4px; }
+.stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+.chart-card {
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 24px; margin-bottom: 24px;
+}
+.chart-title { font-size: 0.9rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px; }
+.bar-value { font-size: 0.68rem; color: rgba(255,255,255,0.6); }
+.bar { width: 100%; background: #FFD100; border-radius: 6px 6px 0 0; min-height: 3px; transition: height .3s; }
+.bar-day { font-size: 0.72rem; color: rgba(255,255,255,0.6); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.list-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; }
+.list-title { font-size: 0.9rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+.tool-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+.tool-row:last-child { border-bottom: none; }
+.tool-time { color: rgba(255,255,255,0.6); font-size: 0.8rem; }
+.list-empty { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.85rem; padding: 16px 0; }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+    <div class="header-right">
+        <button class="menu-button" onclick="window.location.href='menu.html'">Study Tools</button>
+        <div class="badge">AI POWERED</div>
+    </div>
+</header>
+
+<div class="page">
+    <div class="breadcrumb"><a href="menu.html">Study Tools</a> / Session Statistics</div>
+    <div class="page-title">Session Statistics</div>
+    <div class="page-subtitle">Track your study time, focus sessions and progress over time</div>
+    <div class="data-note">Pulled live from Pomodoro Timer, Focus Mode, and Focus Blocker on this device.</div>
+
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-value" id="statTotalTime">0m</div><div class="stat-label">Total time this week</div></div>
+        <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label">Focus sessions this week</div></div>
+        <div class="stat-card"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Day streak</div></div>
+        <div class="stat-card"><div class="stat-value" id="statAvg">0m</div><div class="stat-label">Daily average</div></div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-title">This week</div>
+        <div class="bar-chart" id="barChart"></div>
+    </div>
+
+    <div class="two-col">
+        <div class="list-card">
+            <div class="list-title">Most used tools</div>
+            <div id="toolsList"></div>
+        </div>
+        <div class="list-card">
+            <div class="list-title">Recent sessions</div>
+            <div id="recentList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+function formatMinutes(m) {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    return h > 0 ? h + 'h ' + min + 'm' : min + 'm';
+}
+
+const dailyLog = JSON.parse(localStorage.getItem('studyAIDailyLog') || '{}');
+const sessionEvents = JSON.parse(localStorage.getItem('studyAISessionEvents') || '[]');
+
+// Build last 7 days (oldest to newest)
+const days = [];
+for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({
+        dateKey: d.toDateString(),
+        label: d.toLocaleDateString([], { weekday: 'short' })
+    });
+}
+
+const weekEntries = days.map(d => dailyLog[d.dateKey] || { minutes: 0, sessions: 0 });
+const totalWeekMinutes = weekEntries.reduce((sum, e) => sum + e.minutes, 0);
+const totalWeekSessions = weekEntries.reduce((sum, e) => sum + e.sessions, 0);
+const activeDays = weekEntries.filter(e => e.minutes > 0).length;
+const dailyAvg = activeDays > 0 ? Math.round(totalWeekMinutes / activeDays) : 0;
+
+// Streak: count back from today while each day has minutes > 0
+let streak = 0;
+for (let i = days.length - 1; i >= 0; i--) {
+    const entry = dailyLog[days[i].dateKey];
+    if (entry && entry.minutes > 0) {
+        streak++;
+    } else {
+        break;
+    }
+}
+
+document.getElementById('statTotalTime').textContent = formatMinutes(totalWeekMinutes);
+document.getElementById('statSessions').textContent = totalWeekSessions;
+document.getElementById('statStreak').textContent = streak;
+document.getElementById('statAvg').textContent = formatMinutes(dailyAvg);
+
+// Bar chart
+const maxMinutes = Math.max(1, ...weekEntries.map(e => e.minutes));
+const barChart = document.getElementById('barChart');
+days.forEach((day, i) => {
+    const minutes = weekEntries[i].minutes;
+    const heightPct = Math.round((minutes / maxMinutes) * 100);
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML =
+        '<div class="bar-value">' + (minutes > 0 ? minutes + 'm' : '') + '</div>' +
+        '<div class="bar" style="height:' + heightPct + '%;"></div>' +
+        '<div class="bar-day">' + day.label + '</div>';
+    barChart.appendChild(col);
+});
+
+// Most used tools (aggregate minutes per tool across all logged events)
+const toolTotals = {};
+sessionEvents.forEach(ev => {
+    toolTotals[ev.tool] = (toolTotals[ev.tool] || 0) + ev.minutes;
+});
+const toolsList = document.getElementById('toolsList');
+const sortedTools = Object.entries(toolTotals).sort((a, b) => b[1] - a[1]);
+if (sortedTools.length === 0) {
+    toolsList.innerHTML = '<div class="list-empty">No sessions logged yet, use Pomodoro Timer or Focus Mode to start tracking</div>';
+} else {
+    toolsList.innerHTML = '';
+    sortedTools.forEach(([tool, minutes]) => {
+        const row = document.createElement('div');
+        row.className = 'tool-row';
+        row.innerHTML = '<span>' + escapeHtml(tool) + '</span><span class="tool-time">' + formatMinutes(minutes) + '</span>';
+        toolsList.appendChild(row);
+    });
+}
+
+// Recent sessions
+const recentList = document.getElementById('recentList');
+if (sessionEvents.length === 0) {
+    recentList.innerHTML = '<div class="list-empty">No recent sessions yet</div>';
+} else {
+    recentList.innerHTML = '';
+    sessionEvents.slice(0, 8).forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'tool-row';
+        const label = ev.task ? (ev.tool + ' &middot; ' + escapeHtml(ev.task)) : ev.tool;
+        row.innerHTML = '<span>' + label + '</span><span class="tool-time">' + ev.minutes + ' min</span>';
+        recentList.appendChild(row);
+    });
+}
+</script>
+</body>
+</html>

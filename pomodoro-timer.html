@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro Timer - StudyAI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #003DA5;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: #002d7a;
+    border-bottom: 4px solid #FFD100;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.logo span { color: #FFD100; }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+.district { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.menu-button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.menu-button:hover { border-color: #FFD100; color: #FFD100; }
+.badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #002d7a;
+    background: #FFD100;
+    border-radius: 99px;
+    padding: 4px 12px;
+    letter-spacing: 0.04em;
+}
+.page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+.breadcrumb {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+}
+.breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.breadcrumb a:hover { color: #FFD100; }
+.page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.page-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+.timer-card {
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 48px;
+    text-align: center;
+    margin-bottom: 24px;
+}
+.mode-tabs {
+    display: inline-flex;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 32px;
+}
+.mode-tab {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'Inter', sans-serif;
+}
+.mode-tab.active { background: #FFD100; color: #002d7a; }
+.timer-display {
+    font-size: 6rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.timer-label {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.progress-track {
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.1);
+    max-width: 400px;
+    margin: 0 auto 32px;
+    overflow: hidden;
+}
+.progress-fill { width: 0%; height: 100%; background: #FFD100; transition: width 1s linear; }
+.controls { display: flex; gap: 16px; justify-content: center; }
+.btn-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.4rem;
+}
+.btn-circle.primary { background: #FFD100; color: #002d7a; }
+.btn-circle.secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.btn-circle:hover { opacity: 0.85; }
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: #002d7a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+}
+.stat-value { font-size: 1.6rem; font-weight: 800; color: #FFD100; margin-bottom: 4px; }
+.stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
+.settings-card {
+    background: #002d7a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 24px;
+}
+.settings-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; }
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 0.9rem; }
+.settings-input {
+    width: 70px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    text-align: center;
+}
+.settings-input:focus { outline: none; border-color: #FFD100; }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+    <div class="header-right">
+        <button class="menu-button" onclick="window.location.href='menu.html'">Study Tools</button>
+        <div class="badge">AI POWERED</div>
+    </div>
+</header>
+
+<div class="page">
+    <div class="breadcrumb"><a href="menu.html">Study Tools</a> / Pomodoro Timer</div>
+    <div class="page-title">Pomodoro Timer</div>
+    <div class="page-subtitle">Stay focused with structured work and break sessions</div>
+
+    <div class="timer-card">
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="focus">Focus</button>
+            <button class="mode-tab" data-mode="short">Short break</button>
+            <button class="mode-tab" data-mode="long">Long break</button>
+        </div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-label" id="timerLabel">Focus session &middot; 1 of 4</div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="controls">
+            <button class="btn-circle secondary" id="resetBtn" title="Reset">&#8634;</button>
+            <button class="btn-circle primary" id="playPauseBtn" title="Start">&#9654;</button>
+            <button class="btn-circle secondary" id="skipBtn" title="Skip">&#9197;</button>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value" id="statSessions">0</div>
+            <div class="stat-label">Sessions today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statFocusTime">0m</div>
+            <div class="stat-label">Focus time</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statBreaks">0</div>
+            <div class="stat-label">Breaks taken</div>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <div class="settings-title">Session settings</div>
+        <div class="settings-row">
+            <div class="settings-row-label">Focus duration (minutes)</div>
+            <input type="number" class="settings-input" id="setFocus" value="25" min="1" max="120">
+        </div>
+        <div class="settings-row">
+            <div class="settings-row-label">Short break duration (minutes)</div>
+            <input type="number" class="settings-input" id="setShort" value="5" min="1" max="60">
+        </div>
+        <div class="settings-row">
+            <div class="settings-row-label">Long break duration (minutes)</div>
+            <input type="number" class="settings-input" id="setLong" value="15" min="1" max="60">
+        </div>
+        <div class="settings-row">
+            <div class="settings-row-label">Sessions before long break</div>
+            <input type="number" class="settings-input" id="setCycles" value="4" min="1" max="10">
+        </div>
+    </div>
+</div>
+
+<script>
+const state = {
+    mode: 'focus',
+    durations: { focus: 25, short: 5, long: 15 },
+    cyclesBeforeLong: 4,
+    secondsLeft: 25 * 60,
+    totalSeconds: 25 * 60,
+    running: false,
+    timerId: null,
+    sessionInCycle: 1
+};
+
+const today = new Date().toDateString();
+let stats = JSON.parse(localStorage.getItem('pomodoroStats') || 'null');
+if (!stats || stats.date !== today) {
+    stats = { date: today, sessions: 0, focusMinutes: 0, breaks: 0 };
+}
+
+const savedSettings = JSON.parse(localStorage.getItem('pomodoroSettings') || 'null');
+if (savedSettings) {
+    state.durations = savedSettings.durations;
+    state.cyclesBeforeLong = savedSettings.cyclesBeforeLong;
+}
+
+const timerDisplay = document.getElementById('timerDisplay');
+const timerLabel = document.getElementById('timerLabel');
+const progressFill = document.getElementById('progressFill');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+const skipBtn = document.getElementById('skipBtn');
+const modeTabs = document.querySelectorAll('.mode-tab');
+const statSessions = document.getElementById('statSessions');
+const statFocusTime = document.getElementById('statFocusTime');
+const statBreaks = document.getElementById('statBreaks');
+const setFocus = document.getElementById('setFocus');
+const setShort = document.getElementById('setShort');
+const setLong = document.getElementById('setLong');
+const setCycles = document.getElementById('setCycles');
+
+function saveStats() {
+    localStorage.setItem('pomodoroStats', JSON.stringify(stats));
+}
+function saveSettings() {
+    localStorage.setItem('pomodoroSettings', JSON.stringify({
+        durations: state.durations,
+        cyclesBeforeLong: state.cyclesBeforeLong
+    }));
+}
+
+function renderStats() {
+    statSessions.textContent = stats.sessions;
+    const h = Math.floor(stats.focusMinutes / 60);
+    const m = stats.focusMinutes % 60;
+    statFocusTime.textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+    statBreaks.textContent = stats.breaks;
+}
+
+function formatTime(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+}
+
+function labelForMode(mode) {
+    if (mode === 'focus') return 'Focus session &middot; ' + state.sessionInCycle + ' of ' + state.cyclesBeforeLong;
+    if (mode === 'short') return 'Short break';
+    return 'Long break';
+}
+
+function updateDisplay() {
+    timerDisplay.textContent = formatTime(state.secondsLeft);
+    timerLabel.innerHTML = labelForMode(state.mode);
+    const pct = 100 - (state.secondsLeft / state.totalSeconds) * 100;
+    progressFill.style.width = pct + '%';
+    playPauseBtn.innerHTML = state.running ? '&#10074;&#10074;' : '&#9654;';
+}
+
+function setMode(mode) {
+    state.mode = mode;
+    const minutes = state.durations[mode];
+    state.totalSeconds = minutes * 60;
+    state.secondsLeft = minutes * 60;
+    modeTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.mode === mode));
+    updateDisplay();
+}
+
+function pauseTimer() {
+    state.running = false;
+    clearInterval(state.timerId);
+    updateDisplay();
+}
+
+function startTimer() {
+    if (state.running) return;
+    state.running = true;
+    updateDisplay();
+    state.timerId = setInterval(() => {
+        state.secondsLeft--;
+        if (state.secondsLeft <= 0) {
+            completeSession();
+            return;
+        }
+        updateDisplay();
+    }, 1000);
+}
+
+function logToSharedStats(tool, minutes, task) {
+    const dateKey = new Date().toDateString();
+    const log = JSON.parse(localStorage.getItem('studyAIDailyLog') || '{}');
+    if (!log[dateKey]) log[dateKey] = { minutes: 0, sessions: 0 };
+    log[dateKey].minutes += minutes;
+    log[dateKey].sessions += 1;
+    localStorage.setItem('studyAIDailyLog', JSON.stringify(log));
+
+    const events = JSON.parse(localStorage.getItem('studyAISessionEvents') || '[]');
+    events.unshift({
+        tool: tool,
+        task: task || null,
+        minutes: minutes,
+        dateKey: dateKey,
+        when: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    });
+    localStorage.setItem('studyAISessionEvents', JSON.stringify(events.slice(0, 100)));
+}
+
+function completeSession() {
+    clearInterval(state.timerId);
+    state.running = false;
+
+    if (state.mode === 'focus') {
+        stats.sessions++;
+        stats.focusMinutes += state.durations.focus;
+        saveStats();
+        renderStats();
+        logToSharedStats('Pomodoro Timer', state.durations.focus, null);
+        const nextMode = state.sessionInCycle >= state.cyclesBeforeLong ? 'long' : 'short';
+        if (nextMode === 'long') {
+            state.sessionInCycle = 1;
+        } else {
+            state.sessionInCycle++;
+        }
+        setMode(nextMode);
+    } else {
+        stats.breaks++;
+        saveStats();
+        renderStats();
+        setMode('focus');
+    }
+}
+
+playPauseBtn.addEventListener('click', () => {
+    if (state.running) {
+        pauseTimer();
+    } else {
+        startTimer();
+    }
+});
+
+resetBtn.addEventListener('click', () => {
+    pauseTimer();
+    setMode(state.mode);
+});
+
+skipBtn.addEventListener('click', () => {
+    pauseTimer();
+    completeSession();
+});
+
+modeTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        pauseTimer();
+        setMode(tab.dataset.mode);
+    });
+});
+
+function applySettingsFromInputs() {
+    const focusVal = Math.max(1, parseInt(setFocus.value) || 25);
+    const shortVal = Math.max(1, parseInt(setShort.value) || 5);
+    const longVal = Math.max(1, parseInt(setLong.value) || 15);
+    const cyclesVal = Math.max(1, parseInt(setCycles.value) || 4);
+    state.durations = { focus: focusVal, short: shortVal, long: longVal };
+    state.cyclesBeforeLong = cyclesVal;
+    saveSettings();
+    if (!state.running) {
+        setMode(state.mode);
+    }
+}
+
+[setFocus, setShort, setLong, setCycles].forEach(input => {
+    input.addEventListener('change', applySettingsFromInputs);
+});
+
+setFocus.value = state.durations.focus;
+setShort.value = state.durations.short;
+setLong.value = state.durations.long;
+setCycles.value = state.cyclesBeforeLong;
+
+renderStats();
+setMode('focus');
+</script>
+</body>
+</html>

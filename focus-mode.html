@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Mode - StudyAI</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #003DA5; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #002d7a; border-bottom: 4px solid #FFD100; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.logo span { color: #FFD100; }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+.district { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.menu-button { padding: 10px 20px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.menu-button:hover { border-color: #FFD100; color: #FFD100; }
+.badge { font-size: 0.7rem; font-weight: 700; color: #002d7a; background: #FFD100; border-radius: 99px; padding: 4px 12px; letter-spacing: 0.04em; }
+.page { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+.breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+.breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.breadcrumb a:hover { color: #FFD100; }
+.page-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.page-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+
+/* Setup screen */
+.setup-card {
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 24px;
+}
+.field-label { font-size: 0.78rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.task-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 28px;
+}
+.task-input::placeholder { color: rgba(255,255,255,0.4); }
+.task-input:focus { outline: none; border-color: #FFD100; }
+.duration-row { display: flex; gap: 10px; margin-bottom: 32px; }
+.duration-pill {
+    flex: 1; text-align: center; padding: 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.85rem; font-weight: 700; cursor: pointer;
+}
+.duration-pill.active { background: #FFD100; color: #002d7a; border-color: #FFD100; }
+.start-btn {
+    width: 100%; padding: 16px; border-radius: 12px; border: none;
+    background: #FFD100; color: #002d7a; font-weight: 800; font-size: 0.95rem; cursor: pointer;
+}
+.start-btn:hover { background: #f0c400; }
+.start-btn:disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); cursor: not-allowed; }
+
+/* Active session screen */
+.session-card {
+    background: linear-gradient(180deg, #123d91 0%, #0d3278 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 56px 40px;
+    text-align: center;
+    margin-bottom: 24px;
+    display: none;
+}
+.session-task-label { font-size: 0.75rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.session-task { font-size: 1.2rem; font-weight: 700; margin-bottom: 32px; }
+.session-timer { font-size: 5rem; font-weight: 800; letter-spacing: 3px; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.session-remaining { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+.end-btn {
+    padding: 12px 28px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.25);
+    background: transparent; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+}
+.end-btn:hover { border-color: #ff8080; color: #ff8080; }
+
+/* Stats + history */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; text-align: center; }
+.stat-value { font-size: 1.4rem; font-weight: 800; color: #FFD100; margin-bottom: 4px; }
+.stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+.history-card { background: #002d7a; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; }
+.history-title { font-size: 0.9rem; font-weight: 700; color: #FFD100; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+.history-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; }
+.history-row:last-child { border-bottom: none; }
+.history-task { font-weight: 600; }
+.history-meta { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.history-empty { font-size: 0.85rem; color: rgba(255,255,255,0.5); text-align: center; padding: 12px 0; }
+.status-complete { color: #4ade80; font-size: 0.72rem; font-weight: 700; }
+.status-early { color: rgba(255,255,255,0.5); font-size: 0.72rem; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo">Study<span>AI</span></div>
+        <div class="divider"></div>
+        <div class="district">Broward County Public Schools</div>
+    </div>
+    <div class="header-right">
+        <button class="menu-button" onclick="window.location.href='menu.html'">Study Tools</button>
+        <div class="badge">AI POWERED</div>
+    </div>
+</header>
+
+<div class="page">
+    <div class="breadcrumb"><a href="menu.html">Study Tools</a> / Focus Mode</div>
+    <div class="page-title">Focus Mode</div>
+    <div class="page-subtitle">A calm, distraction-free space to work through one task at a time</div>
+
+    <div class="setup-card" id="setupCard">
+        <div class="field-label">What are you focusing on?</div>
+        <input type="text" class="task-input" id="taskInput" placeholder="e.g. Chapter 4 reading, Chemistry homework...">
+
+        <div class="field-label">Session length</div>
+        <div class="duration-row" id="durationRow">
+            <div class="duration-pill" data-mins="15">15 min</div>
+            <div class="duration-pill active" data-mins="30">30 min</div>
+            <div class="duration-pill" data-mins="45">45 min</div>
+            <div class="duration-pill" data-mins="60">60 min</div>
+        </div>
+
+        <button class="start-btn" id="startBtn" disabled>Start focus session</button>
+    </div>
+
+    <div class="session-card" id="sessionCard">
+        <div class="session-task-label">Focusing on</div>
+        <div class="session-task" id="sessionTaskDisplay">&nbsp;</div>
+        <div class="session-timer" id="sessionTimer">30:00</div>
+        <div class="session-remaining" id="sessionRemaining">remaining</div>
+        <button class="end-btn" id="endBtn">End session early</button>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-value" id="statSessions">0</div><div class="stat-label">Sessions today</div></div>
+        <div class="stat-card"><div class="stat-value" id="statTime">0m</div><div class="stat-label">Focus time today</div></div>
+        <div class="stat-card"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Day streak</div></div>
+    </div>
+
+    <div class="history-card">
+        <div class="history-title">Recent sessions</div>
+        <div id="historyList"><div class="history-empty">No sessions yet, start your first one above</div></div>
+    </div>
+</div>
+
+<script>
+const setupCard = document.getElementById('setupCard');
+const sessionCard = document.getElementById('sessionCard');
+const taskInput = document.getElementById('taskInput');
+const durationRow = document.getElementById('durationRow');
+const startBtn = document.getElementById('startBtn');
+const endBtn = document.getElementById('endBtn');
+const sessionTaskDisplay = document.getElementById('sessionTaskDisplay');
+const sessionTimer = document.getElementById('sessionTimer');
+const sessionRemaining = document.getElementById('sessionRemaining');
+const statSessions = document.getElementById('statSessions');
+const statTime = document.getElementById('statTime');
+const statStreak = document.getElementById('statStreak');
+const historyList = document.getElementById('historyList');
+
+let selectedMinutes = 30;
+let secondsLeft = 0;
+let totalSeconds = 0;
+let currentTask = '';
+let timerInterval = null;
+
+const today = new Date().toDateString();
+let data = JSON.parse(localStorage.getItem('focusModeData') || 'null');
+if (!data) {
+    data = { date: today, sessions: 0, focusMinutes: 0, streak: 0, lastActiveDate: null, history: [] };
+}
+if (data.date !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (data.lastActiveDate === yesterday.toDateString() && data.sessions > 0) {
+        data.streak = data.streak;
+    } else if (data.lastActiveDate !== today) {
+        data.streak = 0;
+    }
+    data.date = today;
+    data.sessions = 0;
+    data.focusMinutes = 0;
+}
+
+function saveData() {
+    localStorage.setItem('focusModeData', JSON.stringify(data));
+}
+
+function renderStats() {
+    statSessions.textContent = data.sessions;
+    const h = Math.floor(data.focusMinutes / 60);
+    const m = data.focusMinutes % 60;
+    statTime.textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+    statStreak.textContent = data.streak;
+}
+
+function renderHistory() {
+    if (!data.history || data.history.length === 0) {
+        historyList.innerHTML = '<div class="history-empty">No sessions yet, start your first one above</div>';
+        return;
+    }
+    historyList.innerHTML = '';
+    data.history.slice(0, 6).forEach(entry => {
+        const row = document.createElement('div');
+        row.className = 'history-row';
+        row.innerHTML = '<div><div class="history-task">' + escapeHtml(entry.task) + '</div>' +
+            '<div class="history-meta">' + entry.when + '</div></div>' +
+            '<div class="' + (entry.completed ? 'status-complete' : 'status-early') + '">' +
+            (entry.completed ? entry.minutes + ' min &middot; Completed' : entry.minutes + ' min &middot; Ended early') + '</div>';
+        historyList.appendChild(row);
+    });
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+durationRow.querySelectorAll('.duration-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        durationRow.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        selectedMinutes = parseInt(pill.dataset.mins);
+    });
+});
+
+taskInput.addEventListener('input', () => {
+    startBtn.disabled = taskInput.value.trim().length === 0;
+});
+
+function formatTime(sec) {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+}
+
+startBtn.addEventListener('click', () => {
+    currentTask = taskInput.value.trim();
+    if (!currentTask) return;
+    totalSeconds = selectedMinutes * 60;
+    secondsLeft = totalSeconds;
+    setupCard.style.display = 'none';
+    sessionCard.style.display = 'block';
+    sessionTaskDisplay.textContent = currentTask;
+    sessionTimer.textContent = formatTime(secondsLeft);
+    timerInterval = setInterval(() => {
+        secondsLeft--;
+        sessionTimer.textContent = formatTime(secondsLeft);
+        if (secondsLeft <= 0) {
+            finishSession(true);
+        }
+    }, 1000);
+});
+
+function logToSharedStats(tool, minutes, task) {
+    const dateKey = new Date().toDateString();
+    const log = JSON.parse(localStorage.getItem('studyAIDailyLog') || '{}');
+    if (!log[dateKey]) log[dateKey] = { minutes: 0, sessions: 0 };
+    log[dateKey].minutes += minutes;
+    log[dateKey].sessions += 1;
+    localStorage.setItem('studyAIDailyLog', JSON.stringify(log));
+
+    const events = JSON.parse(localStorage.getItem('studyAISessionEvents') || '[]');
+    events.unshift({
+        tool: tool,
+        task: task || null,
+        minutes: minutes,
+        dateKey: dateKey,
+        when: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    });
+    localStorage.setItem('studyAISessionEvents', JSON.stringify(events.slice(0, 100)));
+}
+
+function finishSession(completed) {
+    clearInterval(timerInterval);
+    const minutesSpent = completed ? selectedMinutes : Math.ceil((totalSeconds - secondsLeft) / 60);
+    if (minutesSpent > 0) {
+        data.sessions++;
+        data.focusMinutes += minutesSpent;
+        if (data.lastActiveDate !== today) {
+            data.streak = data.streak + (data.lastActiveDate ? 1 : 1);
+        }
+        data.lastActiveDate = today;
+        data.history.unshift({
+            task: currentTask,
+            minutes: minutesSpent,
+            completed: completed,
+            when: 'Today, ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        });
+        data.history = data.history.slice(0, 20);
+        saveData();
+        renderStats();
+        renderHistory();
+        logToSharedStats('Focus Mode', minutesSpent, currentTask);
+    }
+    sessionCard.style.display = 'none';
+    setupCard.style.display = 'block';
+    taskInput.value = '';
+    startBtn.disabled = true;
+}
+
+endBtn.addEventListener('click', () => {
+    if (confirm('End this focus session early?')) {
+        finishSession(false);
+    }
+});
+
+renderStats();
+renderHistory();
+</script>
+</body>
+</html>

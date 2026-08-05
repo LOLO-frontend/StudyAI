@@ -1,0 +1,48 @@
+# StudyAI — Study Tools
+
+A suite of study tools built for Broward County Public Schools, styled in a navy/gold theme with real, working functionality (no fake mockups).
+
+## Pages
+
+| File | What it does |
+|---|---|
+| `menu.html` | Main Study Tools grid (your existing hub page — links to all tools below) |
+| `pomodoro-timer.html` | Working countdown timer with Focus / Short break / Long break modes, auto-cycling, editable durations, and live stats |
+| `focus-mode.html` | Distraction-free session tracker — set a task and duration, get a minimal countdown view, session history, streaks |
+| `focus-blocker.html` | Blocklist manager + honest tab-away tracker. Syncs live with the companion browser extension if installed (see below) |
+| `study-music.html` | Ambient/lo-fi/piano/jazz music generated live in-browser via the Web Audio API — no audio files, no copyright concerns |
+| `white-noise.html` | Layered ambient sound generator (Rain, Ocean, Fan) with a mixer and auto-stop timer |
+| `session-statistics.html` | Aggregates real usage data from Pomodoro Timer, Focus Mode, and Focus Blocker into one dashboard (weekly chart, streaks, most-used tools, recent sessions) |
+
+## Companion browser extension
+
+`focus-blocker-extension.zip` — a real Chrome/Edge extension that can actually block distracting sites (something a plain webpage can't do on its own).
+
+### Install it
+1. Unzip `focus-blocker-extension.zip`
+2. Go to `edge://extensions` (or `chrome://extensions`)
+3. Turn on **Developer mode** (top right)
+4. Click **Load unpacked**, select the unzipped folder
+5. Click **Details** on the extension and turn on **"Allow access to file URLs"** — required for `focus-blocker.html` to sync with it while running locally
+6. Open `focus-blocker.html` — if it connects, the banner turns green and the blocklist/toggle become "live"
+
+## How data works
+
+Everything is stored locally in the browser via `localStorage` — there's no backend or account system (yet). This means:
+- Stats are per-browser, per-device — they won't sync across devices
+- Clearing browser data wipes all history/stats
+- All the pages need to be opened from the **same location** (same folder or same hosted domain) for shared stats to work, since `localStorage` is scoped per-origin
+
+### Shared data keys (used by Session Statistics)
+- `studyAIDailyLog` — daily totals: minutes studied, sessions completed, distractions logged
+- `studyAISessionEvents` — a rolling log of individual sessions (tool used, task name, minutes, timestamp)
+
+### Per-tool keys
+- `pomodoroStats`, `pomodoroSettings`
+- `focusModeData`
+- `focusBlockerList`, `focusBlockerLog`
+
+## Notes / next steps
+- Rename `studytools.html` references to match your actual hub page filename if it's different from `menu.html`
+- The Focus Blocker extension's blocklist ID (unpacked) will differ machine to machine — this is normal for dev/unpacked extensions
+- If you ever want stats to sync across devices, that requires a real backend (e.g. your existing Google Apps Script / Sheets setup, or a small Node/Express API) instead of `localStorage`
