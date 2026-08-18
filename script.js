@@ -1,4 +1,4 @@
-const API_KEY = "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";
+const API_KEY = "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";
 let studyContext = "";
 let quizData = [];
 
